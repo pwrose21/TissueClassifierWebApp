@@ -28,6 +28,7 @@ def upload_file():
    #BASE_DIR = '/tmp/uploads/'
    #files = os.listdir(BASE_DIR)
    files = os.listdir(app.config['LOCAL_PATH'])
+   files = [x for x in files if 'jpeg' in x]
    return render_template('cover.html', files=files)
 #   return '''
 #      <!doctype html>
