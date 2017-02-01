@@ -56,15 +56,16 @@
           <div class="inner cover">
             <h2 class="cover-heading">Upload Your Image</h2>
             <p class="lead">For best results your image should be X tissue with Y stain at Z magnification</p>
+	    
 	    <form action="" method=post enctype=multipart/form-data>
 	      <!--<p>--> <!--<input type=file name=file>-->
-	      <input type="file" name="file" id="file" class="inputfile"/>
+	      <input type="file" name="file" id="file" class="inputfile" data-multiple-caption="{count} files selected" multiple />
 	      <label for="file"> Choose a file </label>
 	      <!--<input type=submit value=Classify>-->
 	      <button type="submit" class="btn btn-default">Classify</button>
 	     <!-- </p>-->
 	    </form>
-	    <h1> OR </h1>
+	    <h1> or </h1>
 	    <h2> Select From Sample Images </h2>
 	    <form class="form-inline" method="POST" action="{{url_for('test')}}">
 	      <div class="form-group">
@@ -79,7 +80,7 @@
 		<button type="submit" class="btn btn-default">Classify</button>
 	      </div>
 	      </form>
-
+	    </div>
 	    <!--<input
 	    <ul>
 	      {% for file in files %}

@@ -163,6 +163,7 @@ body {
 }
 
 /* My personal edits */
+
 .inputfile {
 	width: 0.1px;
 	height: 0.1px;
@@ -172,24 +173,33 @@ body {
 	z-index: -1;
 }
 
+
 .inputfile + label {
-    font-size: 1.25em;
-    font-weight: 700;
-    color: white;
-    background-color: black;
-    display: inline-block;
+    color: #333;
+    text-shadow: none; /* Prevent inheritance from `body` */
+    background-color: #fff;
+    border: 7px solid #fff;
+    border-radius: 4px;
+    font-weight: 400;
+    
 }
 
 .inputfile:focus + label,
 .inputfile + label:hover {
-    background-color: red;
+    background-color: #9ecae1;
+    border-color: #9ecae1;
 }
+
+
+
 
 .inputfile + label {
-	cursor: pointer; /* "hand" cursor */
+	cursor: pointer;
 }
 
+/*
 .inputfile:focus + label {
 	outline: 1px dotted #000;
 	outline: -webkit-focus-ring-color auto 5px;
 }
+*/
