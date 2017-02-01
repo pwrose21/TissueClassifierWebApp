@@ -16,7 +16,7 @@ def allowed_file(filename):
       filename.rsplit('.',1)[1] in app.config['ALLOWED_EXTENSIONS']
 
 @app.route('/', methods=['GET', 'POST'])
-#@app.route('/index')
+@app.route('/index', methods=['GET', 'POST'])
 def upload_file():
    if request.method == 'POST':
       file = request.files['file']
@@ -25,8 +25,9 @@ def upload_file():
          file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
          return redirect(url_for('uploaded_file', filename=filename))   
 
-   BASE_DIR = '/tmp/uploads/'
-   files = os.listdir(BASE_DIR)
+   #BASE_DIR = '/tmp/uploads/'
+   #files = os.listdir(BASE_DIR)
+   files = os.listdir(app.config['LOCAL_PATH'])
    return render_template('cover.html', files=files)
 #   return '''
 #      <!doctype html>
@@ -38,6 +39,11 @@ def upload_file():
 #      </form>
 #    '''
 
+def get_file_path(filename):
+   if os.path.exists(os.path.join(app.config['LOCAL_PATH'], filename)):
+      return os.path.join(app.config['LOCAL_PATH'], filename)
+   return os.path.join(app.config['UPLOAD_FOLDER'], filename)
+
 @app.route('/test', methods=['GET', 'POST'])
 def test():
    select = request.form.get('file_select')
@@ -46,7 +52,9 @@ def test():
    return redirect(url_for('uploaded_file', filename=filename))
 
 def analyze_file(filename):
-   img = cv2.imread(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+   img_path = get_file_path(filename)
+   #img = cv2.imread(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+   img = cv2.imread(get_file_path(filename))
    inputX = scaler.transform([fc.calc_feature_1(img),
                               fc.calc_feature_2(img),
                               fc.color_compactness(img),
@@ -62,12 +70,18 @@ def analyze_file(filename):
 @app.route('/show/<filename>')
 def uploaded_file(filename):
    outcome = analyze_file(filename)
-   return render_template('template.html', filename=filename, outcome=outcome)
+   return render_template('result.html', filename=filename, outcome=outcome)
 
 @app.route('/uploads/<filename>')
 def send_file(filename):
-   return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
-
+   #if os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], filename)):
+   #   return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+   #elif os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], filename)):
+   #   return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+   file_path = get_file_path(filename)
+   filename = file_path.split('/')[-1]
+   file_path = file_path.replace(filename, '')
+   return send_from_directory(file_path, filename)
 if __name__ == '__main__':
    app.run()
 
