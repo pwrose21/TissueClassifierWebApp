@@ -24,15 +24,26 @@ def upload_file():
          filename = secure_filename(file.filename)
          file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
          return redirect(url_for('uploaded_file', filename=filename))   
-   return '''
-      <!doctype html>
-      <title>Upload new File</title>
-      <h1>Upload new File</h1>
-      <form action="" method=post enctype=multipart/form-data>
-        <p><input type=file name=file>
-           <input type=submit value=Upload>
-      </form>
-    '''
+
+   BASE_DIR = '/tmp/uploads/'
+   files = os.listdir(BASE_DIR)
+   return render_template('cover.html', files=files)
+#   return '''
+#      <!doctype html>
+#      <title>Upload new File</title>
+#      <h1>Upload new File</h1>
+#      <form action="" method=post enctype=multipart/form-data>
+#        <p><input type=file name=file>
+#           <input type=submit value=Upload>
+#      </form>
+#    '''
+
+@app.route('/test', methods=['GET', 'POST'])
+def test():
+   select = request.form.get('file_select')
+   #filename = '/tmp/uploads/' + select
+   filename = select
+   return redirect(url_for('uploaded_file', filename=filename))
 
 def analyze_file(filename):
    img = cv2.imread(os.path.join(app.config['UPLOAD_FOLDER'], filename))
