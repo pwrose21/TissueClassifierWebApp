@@ -64,10 +64,10 @@ def analyze_file(filename):
                               fc.compute_avg_green(img),
                               fc.compute_avg_blue(img)])
    prob = clf.predict_proba(inputX)[0]
-   print 'prob', prob
+   prob = str(round(100.*prob[1],1))
    if clf.predict(inputX):
-      return 'metastatic_'+str(prob[1])
-   return 'normal_'+str(prob[0])
+      return 'metastatic',str(prob)
+   return 'normal',+str(prob)
 
 @app.route('/show/<filename>')
 def uploaded_file(filename):

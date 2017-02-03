@@ -46,8 +46,8 @@
               <nav>
                 <ul class="nav masthead-nav">
                   <li class="active"><a href="/index">Classifier</a></li>
-                  <li><a href="#">How It Works</a></li>
-                  <li><a href="#">Get In Touch</a></li>
+                  <li><a href="../static/html/howitworks.html">How It Works</a></li>
+                  <li><a href="../static/images/Peyton_Rose_Draft2.pdf">Get In Touch</a></li>
                 </ul>
               </nav>
             </div>
@@ -55,18 +55,19 @@
 	  
 	  {% if filename %}
 	  <img src="{{ url_for('send_file', filename=filename) }}">
-	  <h2> This tissue has been classified as {{outcome}}</h2>  <br>
-	  <h3>To learn about the classifier, please <a href="#"> <u>click here</u> </a> </h3>
+	  <h2> This tissue has been classified as {{outcome[0]}}  <br>
+	  The probability of metastasis is {{outcome[1]}}%.</h2> <br>
+	  <h3>To learn about the classifier, please <a href="../static/html/howitworks.html"> <u>click here</u> </a> </h3>
 	  {% else %}
 	  <h1>Oops! I couldn't find your image</h1>
 	  {% endif %}
-	  
+	  <!--
           <div class="mastfoot">
             <div class="inner">
               <p>Cover template for <a href="http://getbootstrap.com">Bootstrap</a>, by <a href="https://twitter.com/mdo">@mdo</a>.</p>
             </div>
           </div>
-
+-->
         </div>
 
       </div>
