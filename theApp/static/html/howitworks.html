@@ -157,17 +157,123 @@
 	  <img src="../images/blobs.jpg" width="49%"/> <img src="../images/color_compactness.jpg" width="49%"/> <img src="../images/tissue_discontinuity.jpg" width="49%"/>
 	  <img src="../images/avg_blue.jpg" width="49%"/> <img src="../images/avg_red.jpg" width="49%"/> <img src="../images/avg_green.jpg" width="49%"/>
 	  </div>
+	  <br>
+	  The color compactness and tissue discontinuity features are peaked near zero and difficult to visualize,
+	  so I performed a log-transformation to improve the interpretability of these features within the context of the models I
+	  have trained (I added a bias value of 0.1*min(feature) to accomodate feature values equal to 0).  These two log-transformed features
+	  are shown below.
+	  <div style="background-color:white;">
+	    <img src="../images/color_compactness_logtr.png" width="49%"/> <img src="../images/tissue_discontinuity_logtr.jpg" width="49%"/>
+	  </div>
 	  
-	  <h2> The model(s) </h2>
+	  <h2> The models </h2>
 	  <h3> Logistic regression </h3>
 	  Many of the feature disributions above show excellent separation between the normal and metastatic tissue (e.g. blob density
 	  and the average R/G/B across all pixels).  Based on these distributions, I would expect a linear model, such as logistic
 	  regression, to perform reasonably well.  I trained scikit-learn's LogisticRegression classifier with its default parameters
-	  on the 3962 slides in my training set.  This classifier achieves 92.5% accuracy, evaluated on the cross-validation set.
+	  on the 3962 slides in my training set.  This classifier achieves 92.5% accuracy, evaluated on the cross-validation set.  Of
+	  the 99 misclassified slides, 51 are metastatic tissue misclassified as normal and 48 are normal tissue misclassified as
+	  metastatic.  In a logistic regression model, the magnitude of the learned feature coefficients give the relative importance
+	  of each respective feature.  The ranking from the most to the least important feature is:
+	  <ul>
+	    <li> Average Pixel Red </li>
+	    <li> Average Pixel Green </li>
+	    <li> Tissue Discontinuity </li>
+	    <li> Average Pixel Blue </li>
+	    <li> Color Compactness </li>
+	    <li> Blob Density </li>
+	  </ul>
+	  <br>
+	  At first glance, it is maybe a bit surprising that the blob density ranks so low in feature importance.  The blobs density
+	  distributions for normal and metastatic tissue look very separated.  However, the blob density is highly (anti-)correlated with
+	  all three average pixel colors, as can be seen in the correlation matrix below.
+	  <img src="../images/correlation_matrix.jpg" width="100%"/>
+	  <br>
+	  <br>
+	  <h3> Neural net </h3>
+	  Logistic regression models have a linear decision boundary.  If the tissue and metastatic tissue slides are not linearly
+	  separable, it may be advantageous to move to a non-linear classifier, such as a neural network.  I used the Multi-layer
+	  Perceptron (MLP) classifier in scikit-learn.  For this model, it is possible (and advised) to specify the number and size
+	  of the hidden layers.  I iterated over models with one hidden layer of size k1={2,...,11}.  The optimal cross-validation
+	  acuracy was found to be 97.2% for k1=6.  By fixing k1=6 and adding a second hidden layer(again iterating over the size of
+	  the second hidden layer), the cross-validation accuracy had minimal improvement to 97.4% for a second hidden layer size of
+	  k2=5.  Overall, the neural net classifier performs modestly better than the logistic regression classifer, due to the non-linear
+	  decision boundary.
 	  
+	  <h2> What about deep learning? </h2>
+	  Deep learning is a technique in which multiple layers of nonlinear processing units are used to derive high level abstractions of
+	  data.  These methods require an enourmous collection of data and a signficant amount of computing capabilities, only found at
+	  prominent tech companies and research labs.  Inception-v3 is a convolutional neural network, trained on 1 million images across
+	  1000 individual categories, to perform image recognition and categorization.
+	  <h3> Can <b><u>I</u></b> do deep learning? </h3>
+	  Although it is not feasible for most individuals to train a network like Inception-v3 from scratch,
+	  pre-trained networks can be re-purposed to perform new tasks using a method called transfer learning.  The motivation for
+	  transfer learning comes from the fact that most layers in these networks are not performing the classification, but instead, deriving
+	  abstract features on which to perform a classification task.  The bulk of the classification task happens in the last layer.
+	  Therefore, we can simply "chop off" this last layer, and use the output features from the second-to-last layer as inputs
+	  to a new classifier.
+	  <h3> Transfer learning for tissue classification </h3>
+	  For the Inception-v3 network in particular, the relevant output layer for transfer learning is called "pool_3" and produces
+	  2048 features which can be passed to logistic regression or MLP classifier.  I passed my collection of slide frames through the
+	  Inception-v3 neural network and extracted this pool_3 feature vector for each image.  Due to the large size of these feature vectors,
+	  it is useful to perform a principal component analysis to reduce the dimensionality of the data.  The left figure below shows the
+	  cross-validation accuracy of a logisitic regeression classifier, as a function of the number of principal components.  The red horizontal
+	  line near the top of the figure is used to reference the accuracy of MLP classifier trained on the six features derived using computer
+	  vision techniques.  The right figure below shows the % of variance as a function of the number of principal components.  It is a measure
+	  of how well the dimensionality reduction captures the complexity of its original dataset.
+	  <br> <br>
+	  <div style="background-color:white; text-align:center;">
+	  <img src="../images/IncAccVSnPCA.jpg" width="49%"/> <img src="../images/var_retained.jpg" width="49%"/>
+	  </div>
+	  <h3> The performance looks similar </h3>
+	  Yes, both models have a classification accuracy of ~97% on the cross-validation sample.  This might lead one to wonder if there are
+	  certain advantages to either approach.  The transfer learning method has the advantage that it <em> did not require any feature
+	  engineering </em>!  This approach is required for image recognition tasks where it can be hard (if not impossible) to define
+	  general features for image classification (i.e. recognizing most everything objects that come in many shape, colors, and sizes).
+	  For our tissue classification task, many of the features are well suited for computer vision algorithms.  Still, starting from
+	  the Inception-v3 network could have saved a day or two of manual feature engineering.  
+	  <br>
+	  <br>
+	  One of the potential drawbacks of the transfer learning method is the large number of features required to achieve the same
+	  cross-validation accuracy as the method using hand crafted computer vision features.  It is possible that the larger number
+	  of features requires more training examples to achieve the same accuracy.  This can be investigated by selecting different
+	  size subsets of the training data for training the classifiers.  The results of this exercise are shown below.
+	  <br>
+	  <div style="background-color:white;">
+	    <img src="../images/nTrainTurnOn.jpg" width="49%"/> <img src="../images/nTurnOnAss.jpg" width="49%"/>
+	  </div>
+	  <br>
+	  The size of the training set is varied from m=1 to m=3962 (the total number of training examples).
+	  For each m, both a model based on the six computer vision features
+	  and a model based on the transfer learning features are trained using those m examples, and the accuracy is evaluated on the
+	  cross-validation sample.  For the transfer learning method, because the number of principal components cannot be larger than
+	  the number of training examples or the number of features, min(m, no. features) is chosen to the number of principal components.
+	  The left plot above shows the turn on region (m < 20) and the right plot shows the asymptotic behavior.
+							    <br> <br>
+	  <h3> Conclusion </h3>
+          Neither approach shows a clear advantage in the number of training examples required to achieve a high cross-validation
+	  classification accuracy.  The human engineering computer vision features are attractive because they can be easily communicated
+	  to a pathologist.  The transfer learning approach is nice because it requires less input on the human-side of things, and can
+	  be more easily generalized to new classification problems.  Both approaches give very nice results and should give pathologists
+	  hope that we can eliminate some reptetitiveness from their work!
 
-	      
+	  <h2> What's next </h2>
+	  This work is largely a proof-of-concept.  In a real world examples, whole slide images are composed of composed of thousands of
+	  individual slide frames and can contain a wide variety of different looking tissue.  Unless we can construct a training set with a
+	  sufficient number of each of these types of tissue, we will need to resort to unsupervised learning approaches.  One could imagine a heat
+	  map indicating the location of each of the unique types of tissue on a slide, with a key showing a representative slide frame from each
+	  of those  groupings.  The work presented in this blog gives evidence that with a bit more work,
+	  these sorts of applications are very possible!
+						    
 	  <!-- CONTENT ENDS HERE -->
+	  <br>
+	  <br>
+	  <br>
+	  
+	  <div style="text-align:center;">
+	    Peyton Rose . Insight Health Data Science Fellow . pwrose21@gmail.com
+	    <br> <br>
+	  </div>
 	  </div>
 	  
 <!--	  
