@@ -54,10 +54,10 @@
           </div>
 	  
 	  {% if filename %}
-	  <img src="{{ url_for('send_file', filename=filename) }}">
-	  <h2> This tissue has been classified as {{outcome[0]}}  <br>
+	  <img src="{{ url_for('send_file', filename=filename) }}", width="40%">
+	  <h2> This tissue has been classified as {{outcome[0]}}.  <br>
 	  The probability of metastasis is {{outcome[1]}}%.</h2> <br>
-	  <h3>To learn about the classifier, please <a href="../static/html/howitworks.html"> <u>click here</u> </a> </h3>
+	  <h3>To learn about the classifier, please <a href="../static/html/howitworks.html"> <u>click here</u> </a>. </h3>
 	  {% else %}
 	  <h1>Oops! I couldn't find your image</h1>
 	  {% endif %}

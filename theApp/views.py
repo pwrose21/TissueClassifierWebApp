@@ -67,7 +67,7 @@ def analyze_file(filename):
    prob = str(round(100.*prob[1],1))
    if clf.predict(inputX):
       return 'metastatic',str(prob)
-   return 'normal',+str(prob)
+   return 'normal', str(prob)
 
 @app.route('/show/<filename>')
 def uploaded_file(filename):
